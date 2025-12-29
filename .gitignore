@@ -1,0 +1,63 @@
+# Model checkpoints and large binaries
+checkpoints/
+*.pt
+!yolo11n.pt
+*.onnx
+*.engine
+*.plan
+
+# Python bytecode and cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Packaging and venvs
+build/
+dist/
+.eggs/
+*.egg-info/
+*.egg
+.venv/
+venv/
+ENV/
+.env
+.env.*
+*.env
+pip-wheel-metadata/
+pip-log.txt
+
+# Editors and tooling
+.vscode/
+.idea/
+*.code-workspace
+
+# Testing and coverage
+htmlcov/
+.coverage
+.coverage.*
+.cache/
+pytest_cache/
+
+# Notebook noise
+.ipynb_checkpoints/
+
+# Data artifacts
+_data/
+data/raw/
+data/fogged/
+data/depth_midas/
+data/labels_yolo/
+data/manifests/
+data/splits/
+data/yolo/
+runs/
+
+# Logs and misc
+logs/
+wandb/
+*.log
+*.tmp
+*.temp
+*.bak
+.DS_Store
+Thumbs.db

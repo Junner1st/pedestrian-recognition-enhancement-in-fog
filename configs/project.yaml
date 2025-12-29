@@ -1,0 +1,68 @@
+datasets:
+  primary: Citypersons
+  secondary: null  # set to crowdhuman/ecp to enable multi-source merge
+  root: data/raw/citypersons/
+  output_labels: data/labels_yolo
+  splits_dir: data/splits
+  unified_classes: [person]
+  split_seed: 42
+  val_ratio: 0.1
+  test_ratio: 0.0  # keep 0 if you only want train/val
+
+midas:
+  model_type: DPT_Hybrid  # MiDaS model type
+  output_dir: data/depth_midas
+  save_dtype: float16
+
+fog:
+  output_dir: data/fogged
+  airlight:
+    mean: 0.9
+    std: 0.02
+    min: 0.7
+    max: 1.0
+  tbar_targets:  # target mean transmission per tier
+    thin: 0.8
+    mid: 0.55
+    dense: 0.3
+  beta_search:
+    beta_min: 0.02
+    beta_max: 2.0
+    steps: 25
+  blur_sigma: 0.6  # optional light blur; set 0 to disable
+  jpeg_quality: 90  # 100 to disable compression noise
+
+training:
+  base_weights: yolo11n.pt
+  imgsz: 640
+  epochs: 80
+  device: 0
+  workers: 8
+  lr0: 0.01
+  lrf: 0.1
+  weight_decay: 0.0005
+  warmup_epochs: 3.0
+  mosaic_final_pct: 0.2  # reduce strong aug in tail epochs
+  curriculum:
+    phase_a:
+      subsets: [clear, thin]
+      fog_ratio: 0.35
+      epochs: 20
+    phase_b:
+      subsets: [clear, thin, mid]
+      fog_ratio: 0.5
+      epochs: 25
+    phase_c:
+      subsets: [clear, thin, mid, dense]
+      fog_ratio: 0.6
+      epochs: 35
+
+eval:
+  subsets: [clear, thin, mid, dense]
+  metrics: [map50, map]  # map50-95 uses key 'map'
+  save_dir: runs/eval
+
+repro:
+  seed: 42
+  hash_algo: sha256
+
