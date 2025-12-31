@@ -42,10 +42,14 @@ def stage_yolo_subset(subset_name: str, image_paths: List[str], labels_dir: str,
             continue
         img_dst = images_out / f"{stem}{Path(img_path).suffix}"
         lbl_dst = labels_out / f"{stem}.txt"
-        if not img_dst.exists():
-            img_dst.symlink_to(Path(img_path).resolve())
-        if not lbl_dst.exists():
-            lbl_dst.symlink_to(label_src.resolve())
+        src_img = Path(img_path).resolve()
+        if img_dst.exists() or img_dst.is_symlink():
+            img_dst.unlink()
+        img_dst.symlink_to(src_img)
+
+        if lbl_dst.exists() or lbl_dst.is_symlink():
+            lbl_dst.unlink()
+        lbl_dst.symlink_to(label_src.resolve())
     return subset_root
 
 
