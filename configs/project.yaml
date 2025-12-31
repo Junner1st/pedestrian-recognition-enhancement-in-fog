@@ -27,8 +27,8 @@ fog:
     dense: 0.3
   beta_search:
     beta_min: 0.02
-    beta_max: 2.0
-    steps: 25
+    beta_max: 8.0
+    steps: 60
   blur_sigma: 0.6  # optional light blur; set 0 to disable
   jpeg_quality: 90  # 100 to disable compression noise
 
