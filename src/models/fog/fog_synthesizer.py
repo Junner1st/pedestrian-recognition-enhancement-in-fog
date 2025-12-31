@@ -39,14 +39,24 @@ def mean_transmission(depth_norm: np.ndarray, beta: float) -> float:
 
 
 def search_beta_for_target(depth_norm: np.ndarray, target_tbar: float, beta_min: float, beta_max: float, steps: int) -> float:
-    betas = np.linspace(beta_min, beta_max, steps)
-    best_beta = betas[0]
+    """Binary-search beta to match target mean transmission."""
+    best_beta = beta_min
     best_gap = float("inf")
-    for b in betas:
-        gap = abs(mean_transmission(depth_norm, b) - target_tbar)
+    lo, hi = beta_min, beta_max
+    for _ in range(max(1, steps)):
+        mid = 0.5 * (lo + hi)
+        t_mean = mean_transmission(depth_norm, mid)
+        gap = abs(t_mean - target_tbar)
         if gap < best_gap:
             best_gap = gap
-            best_beta = b
+            best_beta = mid
+        # Transmission decreases as beta grows, so adjust bounds accordingly.
+        if t_mean > target_tbar:
+            lo = mid
+        else:
+            hi = mid
+        if abs(hi - lo) < 1e-6:
+            break
     return float(best_beta)
 
 
