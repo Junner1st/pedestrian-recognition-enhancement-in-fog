@@ -27,15 +27,15 @@ fog:
     dense: 0.3
   beta_search:
     beta_min: 0.02
-    beta_max: 8.0
-    steps: 60
+    beta_max: 10.0
+    steps: 80
   blur_sigma: 0.6  # optional light blur; set 0 to disable
   jpeg_quality: 90  # 100 to disable compression noise
 
 training:
-  base_weights: yolo11n.pt
+  base_weights: runs/train/phase_c/weights/best6.pt
   imgsz: 640
-  epochs: 80
+  epochs: 120
   device: 0
   workers: 8
   lr0: 0.01
@@ -51,11 +51,11 @@ training:
     phase_b:
       subsets: [clear, thin, mid]
       fog_ratio: 0.5
-      epochs: 25
+      epochs: 45
     phase_c:
       subsets: [clear, thin, mid, dense]
       fog_ratio: 0.6
-      epochs: 35
+      epochs: 55
 
 eval:
   subsets: [clear, thin, mid, dense]

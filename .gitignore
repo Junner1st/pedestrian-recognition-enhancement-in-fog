@@ -1,3 +1,6 @@
+.gitignore
+configs/project.yaml
+
 # Model checkpoints and large binaries
 checkpoints/
 *.pt

@@ -1,5 +1,7 @@
 import argparse
 import json
+import re
+import shutil
 from pathlib import Path
 from typing import Dict, List
 
@@ -76,6 +78,7 @@ def evaluate_model_on_subsets(
             verbose=False,
             project=str(eval_save_dir),
             name=run_name,
+            classes=[0],
         )
         metrics = res.results_dict
         plot_dir = Path(res.save_dir)
@@ -84,6 +87,25 @@ def evaluate_model_on_subsets(
         results[subset] = payload
         print(f"[eval] {run_name}: {metrics} (plots: {plot_dir})")
     return results
+
+
+def save_incremental_best(base_best: Path) -> Path:
+    """Copy best.pt to best{N}.pt using the next available index in the same directory."""
+    weights_dir = base_best.parent
+    existing_best = list(weights_dir.glob("best*.pt"))
+    max_n = 0
+    for p in existing_best:
+        m = re.match(r"best(\d+)\.pt$", p.name)
+        if m:
+            try:
+                max_n = max(max_n, int(m.group(1)))
+            except ValueError:
+                continue
+    next_n = max_n + 1
+    dest = weights_dir / f"best{next_n}.pt"
+    shutil.copy2(base_best, dest)
+    print(f"[archive] wrote incremental weights {dest}")
+    return dest
 
 
 def main(config_path: str):
@@ -141,9 +163,13 @@ def main(config_path: str):
         )
         trainer = getattr(model, "trainer", None)
         save_dir = Path(getattr(trainer, "save_dir", out_root / phase_name))
-        last_weights = save_dir / "weights" / "last.pt"
+        weights_dir = save_dir / "weights"
+        last_weights = weights_dir / "last.pt"
+        base_best = weights_dir / "best.pt"
         if not last_weights.exists():
             raise FileNotFoundError(f"Missing last weights for phase {phase_name}: {last_weights}")
+        if base_best.exists():
+            save_incremental_best(base_best)
         # Use last weights as start for next phase
         model = YOLO(str(last_weights))
 
@@ -161,6 +187,8 @@ def main(config_path: str):
             )
             summary_path = eval_save_dir / f"{phase_prefix}_summary.json"
             summary_path.write_text(json.dumps(phase_results, indent=2))
+
+    # Incremental best weights are saved per phase; nothing else to archive here.
 
 
 if __name__ == "__main__":

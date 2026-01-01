@@ -42,6 +42,7 @@ def main(config_path: str):
             verbose=False,
             project=str(eval_save_dir),
             name=run_name,
+            classes=[0],
         )
         metrics = res.results_dict
         plot_dir = Path(res.save_dir)
